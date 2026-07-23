@@ -1,0 +1,88 @@
+/*
+  Global stylesheet. Three jobs:
+  1. Pull in Tailwind's layers (these three lines become the whole
+     generated utility stylesheet at build time).
+  2. Define the theme tokens (the palette) as CSS variables.
+  3. A handful of base styles that apply site-wide.
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  THE PALETTE - edit here to retheme the entire site.
+
+  One theme, locked light (owner decision). Values match the latex-css
+  project's light theme:
+    paper    = latex.css --body-bg-color, hsl(210,20%,98%)  (page bg)
+    ink      = latex.css --body-color,    hsl(0,5%,10%)     (text)
+    ink-soft = secondary text (still WCAG AA on paper)
+    rule     = hairlines and borders
+    pine     = the single green accent; pine-deep = its hover shade
+    error    = latex.css's link red, used for invalid form fields
+
+  Numbers are raw RGB channels ("249 250 251"), not rgb(...) calls, so
+  Tailwind can add opacity: bg-paper/95 becomes rgb(249 250 251 / 0.95).
+  tailwind.config.ts maps each variable to its class name.
+*/
+:root {
+  color-scheme: light; /* tells the browser: light UI (scrollbars, etc.) */
+  --paper: 249 250 251;
+  --ink: 27 24 24;
+  --ink-soft: 73 76 80;
+  --rule: 209 213 219;
+  --pine: 30 84 55;
+  --pine-deep: 21 61 40;
+  --error: 168 0 0;
+}
+
+/*
+  Form validation styling. :user-invalid matches a field only AFTER the
+  user has interacted with it (unlike :invalid, which would paint required
+  fields red on page load). The browser supplies the error messages;
+  we only supply the border color.
+*/
+input:user-invalid,
+textarea:user-invalid {
+  border-color: rgb(var(--error));
+}
+
+/* Smooth scrolling for same-page anchor jumps... */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ...unless the visitor's OS says "reduce motion" - then jump instantly */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/*
+  Base body styles via Tailwind's @apply (same classes as in JSX):
+  paper background, ink text, Latin Modern, antialiasing.
+  font-feature-settings turns on ligatures and kerning - small
+  typographic niceties the LaTeX look expects.
+*/
+body {
+  @apply bg-paper text-ink font-serif antialiased;
+  font-feature-settings: "liga", "kern";
+}
+
+/* Text-selection highlight in translucent pine instead of browser blue */
+::selection {
+  background: rgb(var(--pine) / 0.2);
+}
+
+/*
+  Keyboard-focus outline: a 2px pine ring on anything focusable.
+  :focus-visible = only when navigating by keyboard, not on mouse click.
+*/
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgb(var(--pine));
+  outline-offset: 2px;
+}

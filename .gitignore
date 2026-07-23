@@ -1,0 +1,14 @@
+# Dependencies: huge, disposable, rebuilt by `npm install`
+node_modules/
+
+# Build output: rebuilt by `npm run build`
+.next/
+out/
+
+# TypeScript build cache (auto-generated)
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs and OS noise
+npm-debug.log*
+.DS_Store
