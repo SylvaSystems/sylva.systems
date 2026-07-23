@@ -1,0 +1,67 @@
+# Builds the site and deploys it to GitHub Pages on every push to main.
+#
+# Requires (one-time, already or still to do in repo Settings -> Pages):
+#   Source = "GitHub Actions"
+#   Custom domain = sylva.systems (the public/CNAME file keeps it set)
+#
+# Each run: checkout code -> install Node -> npm ci -> next build (static
+# export into out/) -> upload out/ -> deploy to Pages. Takes ~1-2 minutes.
+# The Actions tab shows every run; a failed build never replaces the
+# currently live site.
+
+name: Deploy to GitHub Pages
+
+on:
+  # Every push to main deploys
+  push:
+    branches: [main]
+  # Also allows manual runs from the Actions tab
+  workflow_dispatch:
+
+# Minimum permissions the deploy steps need
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If two pushes land quickly, skip the stale in-between deploy
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # npm ci = clean install from package-lock.json (exact pinned versions)
+      - name: Install dependencies
+        run: npm ci
+
+      # Produces the static site in out/ (next.config.ts has output:"export")
+      - name: Build
+        run: npm run build
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
