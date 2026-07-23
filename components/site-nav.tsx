@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Wordmark } from "@/components/wordmark";
 
 /*
   Masthead header, academic-journal style: centered wordmark on top,
@@ -23,13 +24,12 @@ export function SiteNav() {
   return (
     <header className="border-b border-rule bg-paper">
       <div className="mx-auto max-w-page px-4 sm:px-8">
-        {/* Row 1: the wordmark, centered, linking home */}
+        {/* Row 1: the wordmark lockup, centered, linking home.
+            The font-size here is the lockup's ONE scale knob: everything
+            inside <Wordmark /> is sized relative to it (see wordmark.tsx). */}
         <p className="pt-8 text-center">
-          <Link
-            href="/"
-            className="text-2xl font-bold tracking-tight sm:text-3xl"
-          >
-            Sylva Systems
+          <Link href="/" className="inline-block text-2xl sm:text-[30px]">
+            <Wordmark />
           </Link>
         </p>
 

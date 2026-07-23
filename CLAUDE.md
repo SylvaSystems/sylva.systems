@@ -22,6 +22,11 @@ Design rules in force (from the tasteskill audit process):
   project). Single-font IS the design.
 - No images are faked. Missing assets render as labeled `MediaSlot`
   placeholders describing exactly what belongs there.
+- Every external link (`<a href="https://...">`) opens in a new tab:
+  `target="_blank" rel="noopener noreferrer"` (the rel part is the security
+  companion - without it the new tab can script the opening page). Internal
+  navigation (`<Link href="/...">`) NEVER opens a new tab; same-tab is
+  correct for moving around one's own site.
 
 ## How the whole thing works (plain-English tour)
 

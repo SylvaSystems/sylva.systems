@@ -66,6 +66,8 @@ export default function About() {
             We originally spun out of North Carolina State University’s{" "}
             <a
               href="https://entrepreneurship.ncsu.edu/engineering-entrepreneurs-program/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pine underline underline-offset-4 hover:text-pine-deep"
             >
               Engineering Entrepreneurs Program
@@ -73,6 +75,8 @@ export default function About() {
             and received generous funding from the{" "}
             <a
               href="https://entrepreneurship.ncsu.edu/andrews-launch-accelerator/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pine underline underline-offset-4 hover:text-pine-deep"
             >
               Andrews Launch Accelerator
@@ -119,8 +123,13 @@ export default function About() {
             >
               <MediaSlot description={headshot} aspect="aspect-square" />
               <p className="max-w-measure leading-relaxed">
+                {/* External profile links open a new tab (site rule);
+                    rel="noopener noreferrer" stops the new tab from being
+                    able to script this one */}
                 <a
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="font-bold text-pine underline underline-offset-4 hover:text-pine-deep"
                 >
                   {name}
