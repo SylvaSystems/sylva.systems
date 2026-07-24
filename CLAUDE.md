@@ -20,8 +20,9 @@ Design rules in force (from the tasteskill audit process):
 - Curly apostrophes (') in all visible copy, never straight quotes (').
 - Latin Modern is the only typeface (the LaTeX font, from the latex-css
   project). Single-font IS the design.
-- No images are faked. Missing assets render as labeled `MediaSlot`
-  placeholders describing exactly what belongs there.
+- No images are faked. Missing assets are omitted entirely (site is
+  publishable as-is); each spot keeps a JSX comment describing the asset
+  and the layout to restore when it arrives.
 - Every external link (`<a href="https://...">`) opens in a new tab:
   `target="_blank" rel="noopener noreferrer"` (the rel part is the security
   companion - without it the new tab can script the opening page). Internal
@@ -80,6 +81,7 @@ components/             Reusable pieces used by the pages.
   site-nav.tsx          Masthead header (wordmark + link row).
   site-footer.tsx       Dark one-line footer.
   media-slot.tsx        Labeled placeholder box for missing images/video.
+  hero-lattice.tsx      Animated hero grid canvas (client component, PARKED).
 public/                 Files copied to the site as-is.
   fonts/                Latin Modern .woff2 font files (from latex-css repo).
   .nojekyll             Tells GitHub Pages not to run Jekyll on the output.
@@ -101,10 +103,13 @@ page file.
 1. `layout.tsx` renders `<html><body>` with the font variable attached,
    then the nav, then the current page's content, then the footer.
 2. Every component here is a **Server Component** (the Next.js default):
-   it runs once at build time and outputs static HTML. We have zero
-   client-side interactivity components ("use client" appears nowhere).
-   All interactive behavior on the site is pure CSS (hover states, the
-   sticky hero, form validation).
+   it runs once at build time and outputs static HTML. One client
+   component exists but is PARKED (built, working, not rendered):
+   `components/hero-lattice.tsx`, the animated hero grid canvas. While
+   parked, the site ships zero client JS beyond the framework itself;
+   the hero shows the static .bg-diamond CSS pattern. Re-enable per the
+   "PARKED" comment in app/page.tsx's hero. All interactive behavior on
+   the live site is pure CSS (hover states, form validation).
 3. `npm run build` writes the finished HTML per page into `out/`.
 
 ### The styling system, tokens first
@@ -174,11 +179,16 @@ after the user has interacted with a field).
 
 ### Placeholders and how to replace them
 
-`components/media-slot.tsx` renders a dashed box describing the intended
-asset. To swap in a real image: replace the `<MediaSlot ... />` element
-with a plain `<img src="/images/file.jpg" alt="..." width={...}
-height={...} />` (put the file in `public/images/`). For the hero video,
-replace the MediaSlot with:
+The site currently ships with NO placeholders: every missing asset's
+section was reflowed to a text-only layout, and each spot carries a JSX
+comment describing the asset and the exact markup/classes to restore the
+original image layout. `components/media-slot.tsx` still exists (unused)
+if a labeled placeholder box is ever wanted during development again.
+
+To add a real image: put the file in `public/images/` and follow the
+restore comment at the marked spot, e.g. `<img src="/images/file.jpg"
+alt="..." width={...} height={...} />`. For the hero video, follow the
+hero comment in `app/page.tsx` and use:
 
 ```
 <video autoPlay muted loop playsInline poster="/images/poster.jpg"
@@ -187,7 +197,12 @@ replace the MediaSlot with:
 </video>
 ```
 
-Assets still needed (also described in-page by each slot):
+Assets in place:
+
+- About: 5 team headshots, 800x800 JPEGs in `public/images/team/`
+  (originals in `assets/`; Nathan's was center-cropped square + resized).
+
+Assets still needed (each described by a comment at its spot in the page):
 
 1. Hero: flight/field-test video + poster still.
 2. Current Project: deforestation editorial photo
@@ -198,7 +213,6 @@ Assets still needed (also described in-page by each slot):
    (candidate: Junglekeepers Instagram post Cz3179MAXcq - ask them).
 5. Requirements: prototype workbench photo (our own).
 6. About: team group photo (our own).
-7. About: 5 headshots, square, consistent lighting (our own).
 
 Licensing note: citing a photo credits the author; it is not permission.
 Agency photos (Guardian/eyevine, WWF) need a paid license. The

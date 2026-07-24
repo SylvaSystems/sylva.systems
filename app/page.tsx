@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { MediaSlot } from "@/components/media-slot";
+// Animated hero grid, parked for now - see the comment in the hero below.
+// import { HeroLattice } from "@/components/hero-lattice";
 
 /*
   LANDING PAGE ("/").
@@ -7,12 +8,15 @@ import { MediaSlot } from "@/components/media-slot";
   All visible copy is verbatim from content.md - no generated site text.
   Six sections, each a different layout family (a tasteskill rule: no two
   sections on the page share the same shape):
-    1. Hero: pitch panel over a pinned fullscreen video
-    2. Current Project: text + image split
-    3. Two-column academic text + asymmetric photo row
+    1. Hero: centered pitch panel (fullscreen video returns later)
+    2. Current Project: text lede
+    3. Two-column academic text
     4. Statement band (tinted)
-    5. Definition grid + side visual, closed by the regulatory paragraph
+    5. Definition grid, closed by the regulatory paragraph
     6. Display-figure split (Q4 2026)
+
+  All imagery is deferred until assets are shot/licensed; each section
+  keeps a comment describing the asset and the exact layout to restore.
 
   Recurring Tailwind idioms used below (see CLAUDE.md for the full tour):
   - "mx-auto max-w-page px-4 sm:px-8" = the standard centered content column
@@ -53,44 +57,57 @@ export default function Home() {
        adding a wrapper element to the HTML */
     <>
       {/*
-        1. HERO. The scroll trick, all pure CSS:
-        - The <section> is 200dvh tall: a two-viewport "runway" of scroll.
-        - The video wrapper is sticky top-0 at 100dvh: it scrolls until it
-          hits the top of the screen, then stays pinned, filling the
-          viewport, while the rest of the runway scrolls by.
-        - The pitch panel lives in an absolute layer over the FIRST
-          viewport only, so it scrolls away normally, revealing the video.
-        - When the runway ends, the video unpins and scrolls away too.
-        To tune how long the video holds the screen alone, change h-[200dvh].
-        When the real video arrives, swap MediaSlot for:
-        <video autoPlay muted loop playsInline poster=...>.
-      */}
-      <section className="relative h-[200dvh]">
-        <div className="sticky top-0 h-[100dvh]">
-          <MediaSlot
-            description="Video: the team flying and field-testing a UAV prototype. Muted autoplay loop, fills the viewport behind this panel. Fallback poster: still frame from the same flight."
-            aspect=""
-            className="absolute inset-0 border-x-0"
-          />
-        </div>
+        1. HERO. Interim video-less version: one viewport, pitch panel
+        centered on plain paper.
 
-        {/* The pitch panel layer: centered both ways over the first viewport.
-            z-10 stacks it above the video. */}
-        <div className="absolute inset-x-0 top-0 z-10 mx-auto flex h-[100dvh] w-full max-w-page items-center justify-center px-4 sm:px-8">
-          {/* Solid paper panel guarantees text contrast over any footage */}
-          <div className="max-w-4xl border border-rule bg-paper/95 p-8 sm:p-10">
+        When the flight/field-test video exists, restore the pure-CSS
+        scroll trick (see git history for the exact markup):
+        - Make the <section> h-[200dvh]: a two-viewport scroll "runway".
+        - Inside it, a "sticky top-0 h-[100dvh]" wrapper holding the
+          <video autoPlay muted loop playsInline poster=...> at
+          "absolute inset-0 h-full w-full object-cover": scrolls until it
+          hits the top, then stays pinned fullscreen while the runway
+          scrolls by, then unpins and scrolls away.
+        - Move the panel wrapper div below back to
+          "absolute inset-x-0 top-0 z-10 mx-auto flex h-[100dvh] w-full
+          max-w-page items-center justify-center px-4 sm:px-8" so it
+          overlays the first viewport only and scrolls off to reveal the
+          video (and return the panel to bg-paper/95 for contrast over
+          footage).
+      */}
+      <section className="relative bg-diamond">
+        {/*
+          PARKED: <HeroLattice /> - animated signal lines crawling the
+          lattice (components/hero-lattice.tsx, fully built and working).
+          To re-enable: uncomment the import at the top of this file and
+          render <HeroLattice /> right here, before the panel wrapper.
+          The .bg-diamond class on the section doubles as its no-JS /
+          reduced-motion fallback, so nothing else changes.
+        */}
+        {/* relative z-10 lifts the panel layer above the (future) canvas.
+            Compact band, not a full viewport: just enough grid showing
+            around the card. (Restore h-[100dvh] + items-center when the
+            fullscreen video hero returns.) */}
+        <div className="relative z-10 mx-auto flex w-full max-w-page justify-center px-4 py-10 sm:px-8 sm:py-14">
+          {/* Solid paper panel sits on the diamond lattice; tight padding
+              and gaps keep the card dense. data-hero-panel lets the
+              canvas find these bounds for its adaptive line opacity. */}
+          <div
+            data-hero-panel
+            className="max-w-3xl border border-rule bg-paper p-6 sm:p-7"
+          >
             <h1 className="text-2xl font-bold leading-tight tracking-tight md:text-3xl">
               Sylva Systems is a team designing and deploying mechatronics
               solutions for unique conservation challenges.
             </h1>
-            <p className="mt-6 max-w-measure text-lg leading-relaxed text-ink-soft">
+            <p className="mt-4 max-w-measure text-lg leading-relaxed text-ink-soft">
               Closely working with an organization based in the Amazon
               Rainforest, we are building an autonomous, long-range, unmanned
               aerial vehicle (UAV) as our pilot project.
             </p>
             {/* The two CTAs. One label per destination, reused site-wide:
                 "Reach out" always means /contact/, "Meet the team" always /about/ */}
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-wrap gap-4">
               <Link
                 href="/contact/"
                 className="bg-pine px-6 py-3 text-lg text-paper transition-colors hover:bg-pine-deep active:translate-y-px"
@@ -108,31 +125,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. CURRENT PROJECT: heading + lede on the left, editorial image
-          placeholder on the right; stacks to one column on phones */}
-      <section className="mx-auto max-w-page px-4 py-24 sm:px-8">
-        <div className="grid items-center gap-12 md:grid-cols-2">
-          <div>
-            <h2 className="text-2xl font-bold md:text-3xl">Current Project</h2>
-            <p className="mt-6 max-w-measure text-lg leading-relaxed">
-              Rangers in the Amazon Rainforest face a daunting daily task:
-              surveying the hundreds of thousands of acres under their
-              protection. Illegal logging, mining, and slash-and-burn farming
-              operations pose as constant threats.
-            </p>
-          </div>
-          <MediaSlot
-            description="Photograph: deforestation or illegal mining damage in the Amazon, editorial 16:9 crop. Candidate: the Science article image (Guardian/Eyevine/Redux), pending license."
-            aspect="aspect-video"
-          />
-        </div>
+      {/*
+        2. CURRENT PROJECT. Single text column for now. When the editorial
+        image lands (deforestation/illegal mining damage in the Amazon,
+        16:9 crop; candidate: the Science article image, Guardian/Eyevine/
+        Redux, NEEDS LICENSE), restore the split layout: wrap the heading +
+        lede in <div className="grid items-center gap-12 md:grid-cols-2">
+        <div>...</div> and put the <img className="aspect-video w-full
+        object-cover" /> as the second grid child.
+      */}
+      <section className="mx-auto max-w-page px-4 pb-24 pt-12 sm:px-8">
+        <h2 className="text-2xl font-bold md:text-3xl">Current Project</h2>
+        <p className="mt-6 max-w-measure text-lg leading-relaxed">
+          Rangers in the Amazon Rainforest face a daunting daily task:
+          surveying the hundreds of thousands of acres under their
+          protection. Illegal logging, mining, and slash-and-burn farming
+          operations pose as constant threats.
+        </p>
       </section>
 
       {/*
         3. THE EXISTING TOOLS AND THEIR LIMITS: two-column academic text
         with a vertical hairline between the columns (md:divide-x), like a
-        two-column LaTeX paper. Below it, an asymmetric photo row: the two
-        slots split the width 3/5 + 2/5 (col-span-3 / col-span-2).
+        two-column LaTeX paper.
       */}
       <section className="mx-auto max-w-page px-4 pb-24 sm:px-8">
         <div className="grid gap-10 md:grid-cols-2 md:gap-0 md:divide-x md:divide-rule">
@@ -159,18 +174,18 @@ export default function Home() {
             it can sometimes be 1-2 months between flights.
           </p>
         </div>
-        <div className="mt-14 grid gap-6 md:grid-cols-5">
-          <MediaSlot
-            description="Photograph: drone training or field tech in use, 3:2 crop. Candidate: the CNN drone-training image (Marizilda Cruppe/WWF-UK), pending license."
-            aspect="aspect-[3/2]"
-            className="md:col-span-3"
-          />
-          <MediaSlot
-            description="Photograph: rangers on patrol, square crop. Candidate: the Junglekeepers Instagram ranger photo, pending their permission."
-            aspect="aspect-[3/2] md:aspect-auto"
-            className="md:col-span-2"
-          />
-        </div>
+        {/*
+          Asymmetric photo row goes here once the two photos are licensed:
+          drone-training photo (candidate: CNN image, Marizilda Cruppe/
+          WWF-UK, NEEDS LICENSE) + rangers-on-patrol photo (candidate:
+          Junglekeepers Instagram post Cz3179MAXcq, needs their OK).
+          Restore as:
+
+          <div className="mt-14 grid gap-6 md:grid-cols-5">
+            <img className="aspect-[3/2] w-full object-cover md:col-span-3" ... />
+            <img className="aspect-[3/2] w-full object-cover md:col-span-2 md:aspect-auto md:h-full" ... />
+          </div>
+        */}
       </section>
 
       {/* 4. STATEMENT BAND: the thesis sentence on a pine-tinted band.
@@ -178,7 +193,7 @@ export default function Home() {
       <section className="bg-pine/[0.06]">
         <div className="mx-auto max-w-page px-4 py-16 sm:px-8">
           <p className="max-w-4xl text-2xl font-bold leading-snug md:text-3xl">
-            That’s where our team comes in: bridging the gap between
+            We are bridging the gap between
             commercial drones and military-grade UAVs, bringing the
             capabilities of the latter at the price point of the former.
           </p>
@@ -188,35 +203,35 @@ export default function Home() {
       {/*
         5. PLATFORM REQUIREMENTS: a definition list (<dl> = term + detail
         pairs, the semantically correct HTML for this) looping over the
-        requirements array at the top of this file. The grid splits 3/5
-        for the list, 2/5 for a tall prototype photo slot. The regulatory
+        requirements array at the top of this file. The regulatory
         paragraph closes the section.
+
+        When the prototype workbench photo exists (UAV on the bench or wing
+        assembly in progress, portrait 4:5 crop, our own shot), restore the
+        3/5 + 2/5 split: wrap the <dl> in
+        <div className="mt-12 grid gap-12 md:grid-cols-5"> with the dl at
+        md:col-span-3 (and drop its mt-12), and add
+        <img className="aspect-[4/5] w-full object-cover md:col-span-2" />
+        as the second grid child.
       */}
       <section className="mx-auto max-w-page px-4 py-28 sm:px-8">
         <h2 className="text-2xl font-bold md:text-3xl">
           Above all else, our platform needs to be:
         </h2>
-        <div className="mt-12 grid gap-12 md:grid-cols-5">
-          <dl className="grid gap-x-12 gap-y-14 sm:grid-cols-2 md:col-span-3">
-            {/* .map() renders one <div> per requirement; key= helps React
-                track list items */}
-            {requirements.map(({ term, detail }) => (
-              <div key={term}>
-                <dt className="text-xl font-bold">
-                  <span className="text-pine">{term}</span>,
-                </dt>
-                <dd className="mt-2 max-w-[48ch] leading-relaxed text-ink-soft">
-                  {detail}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <MediaSlot
-            description="Photograph: UAV prototype on the workbench or wing assembly in progress, portrait 4:5 crop."
-            aspect="aspect-[4/5]"
-            className="md:col-span-2"
-          />
-        </div>
+        <dl className="mt-12 grid gap-x-12 gap-y-14 sm:grid-cols-2">
+          {/* .map() renders one <div> per requirement; key= helps React
+              track list items */}
+          {requirements.map(({ term, detail }) => (
+            <div key={term}>
+              <dt className="text-xl font-bold">
+                <span className="text-pine">{term}</span>,
+              </dt>
+              <dd className="mt-2 max-w-[48ch] leading-relaxed text-ink-soft">
+                {detail}
+              </dd>
+            </div>
+          ))}
+        </dl>
         <p className="mt-14 max-w-measure leading-relaxed">
           All of these capabilities and constraints must also match existing
           regulatory frameworks in order to be able to fly. It’s why

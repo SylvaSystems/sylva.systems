@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { MediaSlot } from "@/components/media-slot";
 
 /* Overrides the browser-tab title for this page only */
 export const metadata: Metadata = {
@@ -11,9 +10,12 @@ export const metadata: Metadata = {
 
   All visible copy is verbatim from content.md (the corrupted fragment in
   the About paragraph was repaired per the content owner). Headshots are
-  MediaSlot placeholders until real photos arrive.
+  real photos in /public/images/team/ (800x800 JPEGs).
 
-  Structure: About prose -> team group-photo slot -> The Team list.
+  Structure: About prose -> The Team list. (A full-width team group photo
+  slots back in between the two once it exists - see the commented-out
+  section below.)
+
   The team data lives in the array below; the JSX loops over it, so bios
   are edited HERE, not in the markup.
 */
@@ -23,36 +25,31 @@ const team = [
     name: "Tyler Danner",
     href: "https://www.linkedin.com/in/tyler-danner-a4a3013b1/",
     bio: "grew up in North Carolina and graduated from NC State with a degree in Industrial and Systems Engineering. At Sylva Systems, he’s thrilled to be applying his engineering background to real environmental problems.",
-    headshot:
-      "Headshot of Tyler Danner, square crop, neutral background, consistent lighting with the rest of the set.",
+    headshot: "/images/team/tyler-danner-headshot.jpeg",
   },
   {
     name: "Nathan Hattrup",
     href: "https://www.nathanhattrup.com",
     bio: "is pursuing a masters in electrical and nuclear engineering at NC State. He grew up hiking and camping around the country and has a deep desire to be a steward of the natural world. He’s excited to use his engineering skill set to make meaningful contributions to this effort.",
-    headshot:
-      "Headshot of Nathan Hattrup, square crop, neutral background, consistent lighting with the rest of the set.",
+    headshot: "/images/team/nathan-hattrup-headshot.jpeg",
   },
   {
     name: "Luca Antonescu",
     href: "https://www.linkedin.com/in/luca-antonescu-99b7862b3/",
-    bio: "a biomedical engineering major, spent the majority of his days in nature. So much so, that its complexity and beauty is what drove him to become an engineer. He believes that nature is what ultimately provides the greatest examples of engineering and design, and it is this quality that drives him to apply his knowledge for its conservation.",
-    headshot:
-      "Headshot of Luca Antonescu, square crop, neutral background, consistent lighting with the rest of the set.",
+    bio: ", a biomedical engineering major, spent the majority of his days in nature. So much so, that its complexity and beauty is what drove him to become an engineer. He believes that nature is what ultimately provides the greatest examples of engineering and design, and it is this quality that drives him to apply his knowledge for its conservation.",
+    headshot: "/images/team/luca-antonescu-headshot.jpeg",
   },
   {
     name: "Cole Malinchock",
     href: "https://www.linkedin.com/in/cole-malinchock/",
     bio: "is an NC State mechanical engineering alumni now pursuing a PhD in marine robotics at the University of Michigan. He grew up hiking and biking across North Carolina, and this time in the forest gave him a deep appreciation for the environment and a commitment to protecting it.",
-    headshot:
-      "Headshot of Cole Malinchock, square crop, neutral background, consistent lighting with the rest of the set.",
+    headshot: "/images/team/cole-malinchock-headshot.jpeg",
   },
   {
     name: "Kevin Spencer",
     href: "https://www.linkedin.com/in/kevin-spencer-995376172/",
     bio: "is an NC State student majoring in computer engineering. Growing up, he loved to watch Whale Wars, where he learned about Sea Shepherd’s conservation efforts. This sparked his interest and passion for helping to solve environmental issues.",
-    headshot:
-      "Headshot of Kevin Spencer, square crop, neutral background, consistent lighting with the rest of the set.",
+    headshot: "/images/team/kevin-spencer-headshot.jpeg",
   },
 ];
 
@@ -99,13 +96,20 @@ export default function About() {
         </div>
       </section>
 
-      {/* Full-width team group photo (placeholder until shot) */}
-      <section className="mx-auto max-w-page px-4 pt-16 sm:px-8">
-        <MediaSlot
-          description="Group photograph of the five-person team, in the lab or field, candid, wide 3:2 crop."
-          aspect="aspect-[3/2]"
-        />
-      </section>
+      {/*
+        Full-width team group photo goes here once shot: candid, in the lab
+        or field, wide 3:2 crop. Restore as:
+
+        <section className="mx-auto max-w-page px-4 pt-16 sm:px-8">
+          <img
+            src="/images/team-group.jpg"
+            alt="The five-person Sylva Systems team"
+            width={1500}
+            height={1000}
+            className="w-full"
+          />
+        </section>
+      */}
 
       <section className="mx-auto max-w-page px-4 py-24 sm:px-8">
         <h2 className="text-2xl font-bold md:text-3xl">The Team</h2>
@@ -121,7 +125,16 @@ export default function About() {
               key={name}
               className="grid items-start gap-6 sm:grid-cols-[10rem_1fr] sm:gap-10"
             >
-              <MediaSlot description={headshot} aspect="aspect-square" />
+              {/* 800x800 source, displayed at 10rem; square crop enforced
+                  by aspect-square + object-cover */}
+              <img
+                src={headshot}
+                alt={`Headshot of ${name}`}
+                width={800}
+                height={800}
+                loading="lazy"
+                className="aspect-square w-full object-cover"
+              />
               <p className="max-w-measure leading-relaxed">
                 {/* External profile links open a new tab (site rule);
                     rel="noopener noreferrer" stops the new tab from being
@@ -133,8 +146,11 @@ export default function About() {
                   className="font-bold text-pine underline underline-offset-4 hover:text-pine-deep"
                 >
                   {name}
-                </a>{" "}
-                {bio}
+                </a>
+                {/* Bios starting with "," (appositive, e.g. "Luca
+                    Antonescu, a biomedical...") attach directly to the
+                    name; all others get the normal space */}
+                {bio.startsWith(",") ? bio : ` ${bio}`}
               </p>
             </li>
           ))}

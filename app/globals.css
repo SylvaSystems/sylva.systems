@@ -34,6 +34,24 @@
   --pine: 30 84 55;
   --pine-deep: 21 61 40;
   --error: 168 0 0;
+
+  /*
+    latex.css syntax-token palette (light theme), same raw-RGB-channel
+    format as above so opacity works (rgb(var(--token-teal) / 0.5)).
+    Hex originals in comments. Used for accent moments like the animated
+    grid lines; NOT part of the core theme (pine stays the one site
+    accent for UI).
+  */
+  --token-teal: 64 127 128; /* #407f80 */
+  --token-black: 0 0 0; /* #000000 */
+  --token-grey: 102 102 102; /* #666666 */
+  --token-green: 0 127 0; /* #007f00 */
+  --token-lime: 125 143 41; /* #7d8f29 */
+  --token-brown: 154 110 58; /* #9a6e3a */
+  --token-red: 186 33 33; /* #ba2121 */
+  --token-fuchsia: 221 74 104; /* #dd4a68 */
+  --token-orange: 238 153 0; /* #e90 */
+  --token-pink: 186 102 135; /* #BA6687 */
 }
 
 /*
@@ -47,9 +65,41 @@ textarea:user-invalid {
   border-color: rgb(var(--error));
 }
 
+/*
+  Base type size: 112.5% of the browser default (16px -> 18px). Latin
+  Modern runs small at a given px size (LaTeX-style faces have modest
+  x-height), so the whole site scales up for readability. Everything is
+  rem-based (all Tailwind spacing/text classes), so headings, spacing,
+  and the max-w-* content widths all scale proportionally from this one
+  number.
+*/
+html {
+  font-size: 112.5%;
+}
+
 /* Smooth scrolling for same-page anchor jumps... */
 html {
   scroll-behavior: smooth;
+}
+
+/*
+  .bg-diamond: subtle industrial diamond lattice (think engineering
+  drawing / tread-plate grid). Two crossed 45-degree hairline gradients
+  in the rule color at low opacity - no images, scales infinitely,
+  prints fine. Used behind the hero panel. Keep it faint: it is texture,
+  not decoration.
+*/
+.bg-diamond {
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgb(var(--rule) / 0.4) 0 1.5px,
+      transparent 1px 25px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgb(var(--rule) / 0.4) 0 1.5px,
+      transparent 1px 25px
+    );
 }
 
 /* ...unless the visitor's OS says "reduce motion" - then jump instantly */
