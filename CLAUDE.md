@@ -199,8 +199,9 @@ hero comment in `app/page.tsx` and use:
 
 Assets in place:
 
-- About: 5 team headshots, 800x800 JPEGs in `public/images/team/`
-  (originals in `assets/`; Nathan's was center-cropped square + resized).
+- About: 6 team headshots, 800x800 JPEGs in `public/images/team/`
+  (originals in `assets/`; Nathan's was center-cropped square + resized,
+  Hank's was 797x797 upscaled to 800x800).
 
 Assets still needed (each described by a comment at its spot in the page):
 

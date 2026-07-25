@@ -33,5 +33,7 @@ Ultimately, we are so thrilled for this opportunity to help serve and support gr
 
 [Kevin Spencer](https://www.linkedin.com/in/kevin-spencer-995376172/) is an NC State student majoring in computer engineering. Growing up, he loved to watch Whale Wars, where he learned about Sea Shepherd's conservation efforts. This sparked his interest and passion for helping to solve environmental issues
 
+[Hank Madden](https://www.linkedin.com/in/hank-madden/) graduated from NC State with a degree in Industrial and Systems Engineering. His time outdoors and out adventuring motivate him to use his interpersonal and engineering talents for the greater good of conservation.
+
 ## Contact
 Please don't hesitate to reach out with advice, connections, or even just words of support. We'll take everything we can get!

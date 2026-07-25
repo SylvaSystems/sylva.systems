@@ -51,6 +51,12 @@ const team = [
     bio: "is an NC State student majoring in computer engineering. Growing up, he loved to watch Whale Wars, where he learned about Sea Shepherd’s conservation efforts. This sparked his interest and passion for helping to solve environmental issues.",
     headshot: "/images/team/kevin-spencer-headshot.jpeg",
   },
+  {
+    name: "Hank Madden",
+    href: "https://www.linkedin.com/in/hank-madden/",
+    bio: "graduated from NC State with a degree in Industrial and Systems Engineering. His time outdoors and out adventuring motivate him to use his interpersonal and engineering talents for the greater good of conservation.",
+    headshot: "/images/team/hank-madden-headshot.jpeg",
+  },
 ];
 
 export default function About() {
