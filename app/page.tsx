@@ -194,8 +194,7 @@ export default function Home() {
         <div className="mx-auto max-w-page px-4 py-16 sm:px-8">
           <p className="max-w-4xl text-2xl font-bold leading-snug md:text-3xl">
             We are bridging the gap between
-            commercial drones and military-grade UAVs, bringing the
-            capabilities of the latter at the price point of the former.
+            commercial drones and military-grade UAVs for remote, rainforest enviornments.
           </p>
         </div>
       </section>
