@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Unlisted: no nav link anywhere on the site, and kept out of search. -->
+<meta name="robots" content="noindex, nofollow" />
+<title>Sylva Systems | Deck</title>
+
+<!--
+  ============================================================
+  SYLVA SYSTEMS PITCH DECK
+  ============================================================
+
+  WHY THIS IS A PLAIN .html FILE IN public/ AND NOT app/deck/page.tsx:
+  Next.js App Router applies the root layout.tsx to EVERY page, with no
+  opt-out. That would bolt the site masthead and footer onto every slide.
+  Files in public/ are copied to out/ verbatim and never touch the React
+  tree, so a slide is a slide. It still deploys with the site, and
+  /fonts/*.woff2 and /images/* resolve exactly the same.
+
+  (If a basePath is ever added to next.config.ts, every absolute path in
+  this file needs that prefix. With the sylva.systems custom domain there
+  is no basePath, so leave as is.)
+
+  All visible copy is verbatim from the "# Deck" section of content.md.
+  Nothing here is generated except unavoidable chrome (the slide counter
+  and the two citation labels on slide 2).
+
+  CONTROLS
+    forward   right arrow, down arrow, space, page-down, enter
+    back      left arrow, up arrow, backspace, page-up
+    jump      1-6 for a specific slide, home for first, end for last
+    screen    f toggles fullscreen (F11 also works)
+  The URL hash tracks the slide (#3), so a reload keeps your place.
+-->
+
+<style>
+/* ============================================================
+   1. THE TYPEFACE
+   The same four Latin Modern .woff2 files the site uses. Next's
+   next/font/local hashes its own copies into _next/static/, but the
+   originals are also copied verbatim from public/fonts/, so pointing at
+   them here costs no extra download weight in practice and keeps this
+   file independent of the React build.
+   ============================================================ */
+@font-face {
+  font-family: "Latin Modern";
+  src: url("/fonts/LM-regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Latin Modern";
+  src: url("/fonts/LM-italic.woff2") format("woff2");
+  font-weight: 400; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Latin Modern";
+  src: url("/fonts/LM-bold.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Latin Modern";
+  src: url("/fonts/LM-bold-italic.woff2") format("woff2");
+  font-weight: 700; font-style: italic; font-display: swap;
+}
+
+/* ============================================================
+   2. THE PALETTE
+   Copied verbatim from app/globals.css. Raw RGB channels so the
+   rgb(var(--x) / 0.5) opacity trick works, same as the site.
+   If the site palette changes, change these to match.
+   ============================================================ */
+:root {
+  color-scheme: light;
+  --paper: 249 250 251;
+  --ink: 27 24 24;
+  --ink-soft: 73 76 80;
+  --rule: 209 213 219;
+  --pine: 30 84 55;
+  --pine-deep: 21 61 40;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ============================================================
+   3. THE LETTERBOX
+   The page is a fixed, non-scrolling black-ink field. The slide canvas
+   is centred inside it and scaled to fit. Bars are ink, not pure black,
+   so the rig matches the site palette.
+   ============================================================ */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: rgb(var(--ink));
+}
+body {
+  font-family: "Latin Modern", Georgia, serif;
+  font-feature-settings: "liga", "kern";
+  -webkit-font-smoothing: antialiased;
+  display: grid;
+  place-items: center;
+}
+
+/* ============================================================
+   4. THE STAGE
+   A FIXED 1280x720 canvas. Everything inside is sized in px, which is
+   safe precisely because the canvas never changes size: it is only
+   scaled as a whole by --scale (set by JS on load and on resize).
+   Consequence: the layout you see on this laptop is the layout the
+   projector shows, at any resolution or aspect ratio. That certainty is
+   the entire reason for the fixed canvas.
+   ============================================================ */
+.stage {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  flex: none;
+  transform: scale(var(--scale, 1));
+  transform-origin: center center;
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font-size: 16px;
+  overflow: hidden;
+}
+
+/* ============================================================
+   5. SLIDES
+   All slides stack in the same box; only .is-active is visible. This is
+   discrete advance, like real slideware, NOT scroll-snap: a trackpad
+   flick cannot skip three slides mid-sentence.
+   ============================================================ */
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 64px 72px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease;
+}
+.slide.is-active { opacity: 1; visibility: visible; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: none; }
+}
+
+/* Slides that manage their own full-bleed edges opt out of the padding.
+   justify-content centres their panel on the vertical axis; the panel
+   sets its own horizontal position with align-self. */
+.slide.bleed { padding: 0; justify-content: center; }
+
+/* ============================================================
+   6. TYPE SCALE
+   Fixed px, tuned for a 1280x720 canvas. Latin Modern runs small for
+   its point size (modest x-height), which is why these numbers look
+   large written down and read correctly on screen.
+   ============================================================ */
+.slide-title {
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+.slide-title .accent { color: rgb(var(--pine)); }
+
+.lede { font-size: 25px; line-height: 1.45; max-width: 40ch; }
+.soft { color: rgb(var(--ink-soft)); }
+
+/* The hairline under a slide title, the site's border-rule idiom */
+.title-rule {
+  margin-top: 26px;
+  border-top: 1px solid rgb(var(--rule));
+}
+
+/* Big display figure, same treatment as the site's "Q4 2026" */
+.figure {
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgb(var(--pine));
+}
+
+/* ============================================================
+   7. THE PAPER PANEL
+   Straight off the site hero. Used on slide 2 only, to hold text off a
+   photograph. (The .bg-diamond lattice that used to back the cover,
+   solution and ask slides was removed by owner decision: plain paper.
+   If it is ever wanted back, the rule still lives in app/globals.css.)
+   ============================================================ */
+.panel {
+  border: 1px solid rgb(var(--rule));
+  background: rgb(var(--paper));
+  padding: 40px 44px;
+}
+
+/* ============================================================
+   8. THE WORDMARK (cover slide)
+   Same lockup as components/wordmark.tsx: SYLVA bold ink over SYSTEMS
+   regular pine at 0.4667x, both letter-spaced, with the negative
+   margin-right cancelling the phantom trailing tracking gap so the two
+   lines centre on one true axis. Scales from the one font-size below.
+   ============================================================ */
+.wordmark { display: inline-block; text-align: center; line-height: 1; font-size: 108px; }
+.wordmark .line-1 {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  margin-right: -0.24em;
+  color: rgb(var(--ink));
+}
+.wordmark .line-2 {
+  display: block;
+  margin-top: 0.29em;
+  font-size: 0.4667em;
+  font-weight: 400;
+  letter-spacing: 0.52em;
+  margin-right: -0.52em;
+  color: rgb(var(--pine));
+}
+
+/* ============================================================
+   9. SLIDE 2, THE HOOK
+   mining.jpg is natively 1280x720, an exact canvas match, so it is used
+   full-bleed with a paper panel floated over it. The panel is the same
+   device as the site hero: solid paper on top of imagery, never text
+   dropped straight onto a photograph.
+   ============================================================ */
+.photo-bleed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Held to the left so the photograph's cleared ground stays readable on
+   the right. align-self is the HORIZONTAL axis here, because .slide is a
+   column flex container. */
+.hook-panel {
+  position: relative;
+  align-self: flex-start;
+  margin-left: 72px;
+  width: 620px;
+}
+/* The panel reads as one centred column, so the equation below can sit
+   on its own axis instead of hanging off a left margin. */
+.hook-panel .slide-title,
+.hook-panel .hook-stat,
+.hook-panel .cite { text-align: center; }
+
+/* The equation, set as three stacked centred lines with the equals sign
+   alone on the middle one. Giving "=" its own line makes it read as the
+   hinge of the claim rather than as punctuation inside a sentence. */
+.hook-stat { font-size: 27px; line-height: 1.3; font-weight: 700; }
+.hook-stat p + p { margin-top: 10px; }
+/* Oversized because Latin Modern draws "=" small for its point size:
+   at the body size it reads as a hyphen rather than as the hinge. */
+.hook-stat .eq {
+  font-size: 46px;
+  font-weight: 400;
+  color: rgb(var(--pine));
+  line-height: 0.9;
+}
+.hook-stat .accent { color: rgb(var(--pine)); }
+
+.hook-list { list-style: none; margin-top: 22px; text-align: center; }
+.hook-list li {
+  display: inline-block;
+  position: relative;
+  padding-left: 22px;
+  font-size: 23px;
+  line-height: 1.4;
+  color: rgb(var(--ink-soft));
+}
+/* Square bullet, not a disc: radius 0 is the house rule, everywhere. */
+.hook-list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.55em;
+  width: 7px; height: 7px;
+  background: rgb(var(--pine));
+}
+.cite {
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1px solid rgb(var(--rule));
+  font-size: 13px;
+  color: rgb(var(--ink-soft));
+}
+.cite a { color: rgb(var(--ink-soft)); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ============================================================
+   10. SLIDE 3, THE COMPARISON TABLE
+   Booktabs styling: horizontal rules only, no vertical lines, no fill.
+   That is the LaTeX table idiom, and it matches the rest of the site
+   better than any boxed-grid treatment would.
+   ============================================================ */
+.compare {
+  margin-top: 30px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 19px;
+  line-height: 1.35;
+}
+.compare th, .compare td {
+  padding: 15px 16px;
+  text-align: left;
+  vertical-align: top;
+}
+/* Top rule and the heavier rule under the header, booktabs style */
+.compare thead th { border-top: 2px solid rgb(var(--ink)); }
+.compare thead { border-bottom: 1px solid rgb(var(--ink)); }
+.compare tbody tr { border-bottom: 1px solid rgb(var(--rule)); }
+.compare tbody tr:last-child { border-bottom: 2px solid rgb(var(--ink)); }
+/* Header row and the leftmost column both bold, per the content note.
+   nowrap stops auto table layout from starving the narrowest header
+   ("Plane Rental") and breaking it over two lines. */
+.compare thead th { font-weight: 700; color: rgb(var(--pine)); white-space: nowrap; }
+.compare tbody th { font-weight: 700; width: 250px; }
+.compare tbody td { color: rgb(var(--ink-soft)); }
+.compare thead th:first-child { color: rgb(var(--ink)); }
+
+/* ============================================================
+   11. SLIDE 4, STATEMENT AND THE FOUR PILLARS
+   The statement carries itself on open paper: no box, no lattice, just
+   the sentence centred in the middle of the slide. The four pillars sit
+   beneath it as a wide 2x2, so each one gets real space instead of being
+   squeezed into a quarter-width column.
+   ============================================================ */
+.solution-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 54px;
+}
+/* Width tuned so the sentence breaks over exactly two lines. Narrower
+   and it fragments into three or four short ragged lines. */
+.solution-statement {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  max-width: 1000px;
+}
+
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* Wide: the grid spans most of the canvas so the two columns read as
+     deliberately spaced rather than merely wrapped. */
+  width: 860px;
+  row-gap: 26px;
+  column-gap: 40px;
+}
+.pillars div {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  color: rgb(var(--pine));
+}
+
+/* ============================================================
+   12. SLIDE 5, TEAM AND TRACTION
+   The map is the point of this slide, so it gets the centre and the
+   size. The two of us run as a small 1x2 strip above it, alongside the
+   Junglekeepers mark, separated by the site's hairline divider idiom.
+   Square headshots, because radius 0 is the house rule.
+   ============================================================ */
+/* Tighter than the other slides: the map is height-limited (4:3 in a
+   landscape band), so every pixel of vertical space reclaimed from the
+   padding and the title rule becomes roughly 1.34px of map width. */
+.slide--team { padding: 44px 72px 40px; }
+.slide--team .title-rule { margin-top: 18px; }
+
+.split {
+  margin-top: 16px;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  /* Map hard against the left margin, the stack against the right. */
+  justify-content: space-between;
+  gap: 46px;
+  min-height: 0;
+}
+
+/* The right-hand stack. Names sit BESIDE the headshots: the map's width
+   is fixed by its height, so widening this column costs the map nothing
+   and spends slack that would otherwise sit dead in the middle.
+   align-items: flex-start puts every image on one left edge. */
+.people {
+  flex: none;
+  /* 320, not 300: the column is right-anchored, so the extra width moves
+     its left edge outward and keeps the longest name ("Nathan Hattrup")
+     inside the right margin that the title rule establishes. */
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+}
+.person { display: flex; align-items: center; gap: 18px; }
+.person img { width: 104px; height: 104px; object-fit: cover; flex: none; }
+.person .name { font-size: 22px; font-weight: 700; line-height: 1.15; white-space: nowrap; }
+.person .role { margin-top: 4px; font-size: 17px; color: rgb(var(--pine)); }
+.people .divider { width: 100%; height: 1px; background: rgb(var(--rule)); }
+/* align-self overrides the column's flex-start: the people rows keep a
+   shared left edge, the partner mark centres under them. */
+.people .logo { width: 104px; height: auto; object-fit: contain; align-self: center; }
+
+/* The map is height-limited by the canvas (it is a 4:3 image in a band
+   roughly 500px tall), so height:100% with width:auto is what actually
+   maximises it. object-fit: contain, never cover: the legend sits along
+   its bottom edge and a crop would eat it. */
+.jk-map {
+  height: 100%;
+  width: auto;
+  min-width: 0;
+  object-fit: contain;
+  border: 1px solid rgb(var(--rule));
+}
+
+/* ============================================================
+   13. SLIDE 6, THE ASK
+   A single centred phrase. Deliberately the emptiest slide in the deck:
+   it is the one you talk over, so it should compete with you least.
+   ============================================================ */
+.solo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 30px;
+}
+.solo .slide-title { font-size: 84px; }
+.solo .sub { font-size: 30px; font-weight: 700; color: rgb(var(--pine)); }
+.solo .rule { width: 120px; border-top: 1px solid rgb(var(--rule)); }
+
+/* ============================================================
+   14. SLIDE COUNTER
+   Sits on the canvas, so it scales with everything else and can never
+   drift out of the frame on a different display.
+   ============================================================ */
+.counter {
+  position: absolute;
+  right: 26px;
+  bottom: 20px;
+  font-size: 14px;
+  color: rgb(var(--ink-soft));
+  letter-spacing: 0.06em;
+  z-index: 5;
+}
+/* The cover carries no counter: slide 1 of anything is self-evident. */
+.stage[data-index="0"] .counter { opacity: 0; }
+/* Slide 2 is a dark full-bleed photograph, so the counter flips to paper
+   to stay legible. Update the index if slide order ever changes. */
+.stage[data-index="1"] .counter { color: rgb(var(--paper) / 0.85); }
+</style>
+</head>
+
+<body>
+<div class="stage" id="stage" data-index="0">
+
+  <!-- ========== 1. COVER ========== -->
+  <section class="slide is-active" style="align-items:center; justify-content:center;">
+    <span class="wordmark">
+      <span class="line-1">SYLVA</span>
+      <span class="line-2">SYSTEMS</span>
+    </span>
+  </section>
+
+  <!-- ========== 2. HOOK ==========
+       Photo credit is real and unresolved: mining.jpg is the Science
+       article image (Guardian/Eyevine/Redux) that CLAUDE.md flags as
+       NEEDS LICENSE. Citing it credits the photographer; it is not
+       permission. Fine to present live, unresolved for public hosting.
+  -->
+  <section class="slide bleed">
+    <img class="photo-bleed" src="/images/deck/mining.jpg"
+         alt="Aerial view of illegal mining clearing in the Amazon rainforest" />
+    <div class="panel hook-panel">
+      <h2 class="slide-title">The Battle for<br />The Amazon</h2>
+      <div class="title-rule" style="margin-bottom:30px;"></div>
+      <div class="hook-stat">
+        <p>100 acres of destroyed rainforest</p>
+        <p class="eq" aria-hidden="true">=</p>
+        <p><span class="accent">$2.2M</span> in global economic loss</p>
+      </div>
+      <ul class="hook-list">
+        <li>90% of deforestation is illegal</li>
+      </ul>
+      <p class="cite">
+        Figures:
+        <a href="https://amazoninvestor.org/amazon-deforestation-damage-and-recovery-in-numbers/"
+           target="_blank" rel="noopener noreferrer">amazoninvestor.org</a>
+        &nbsp;/&nbsp; Photograph:
+        <a href="https://www.science.org/content/article/illegal-deforestation-brazil-soars-amid-climate-impunity"
+           target="_blank" rel="noopener noreferrer">science.org</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== 3. PROBLEM ========== -->
+  <section class="slide">
+    <h2 class="slide-title">Can&rsquo;t See The Forest For The Trees</h2>
+    <div class="title-rule"></div>
+    <p class="lede soft" style="margin-top:24px; max-width:80ch;">
+      100,000-300,000+ acre regions of jungle wilderness need constant
+      surveillance against illegal encroachment and destruction.
+    </p>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Trails</th>
+          <th>Drones</th>
+          <th>Satellite Images</th>
+          <th>Plane Rental</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>How Often Can You Use It?</th>
+          <td>Often, can be inaccessible</td>
+          <td>Often</td>
+          <td>Variable, 1-2 months</td>
+          <td>1-2 months</td>
+        </tr>
+        <tr>
+          <th>What Picture Can It Paint?</th>
+          <td>Limited view, large network</td>
+          <td>Surrounding area only, reactive</td>
+          <td>Sections before/after</td>
+          <td>Entire regions</td>
+        </tr>
+        <tr>
+          <th>Cost</th>
+          <td>Medium</td>
+          <td>Low, annual expense</td>
+          <td>High, $1000s per image</td>
+          <td>High</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ========== 4. SOLUTION ==========
+       Hero-style per the content note: paper panel on the diamond
+       lattice, exactly the device used on the landing page.
+       The conceptual UAV render called for here is a dead artifact for
+       now (owner decision) and is deliberately not stubbed. When a
+       render exists, the natural home is a right-hand column: change
+       .solution-body to a two-column grid and drop the image in it.
+  -->
+  <section class="slide">
+    <h2 class="slide-title">
+      Bringing the <span class="accent">[Low-Cost &amp; Scalable]</span> Cavalry
+    </h2>
+    <div class="title-rule"></div>
+
+    <div class="solution-body">
+      <p class="solution-statement">
+        We are building a low-cost, specially designed UAV for the Amazon
+        Rainforest
+      </p>
+
+      <div class="pillars">
+        <div>Reliable</div>
+        <div>Rugged</div>
+        <div>Long-range</div>
+        <div>Autonomous</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 5. TEAM AND TRACTION ========== -->
+  <section class="slide slide--team">
+    <h2 class="slide-title">Becoming Junglekeepers</h2>
+    <div class="title-rule"></div>
+
+    <div class="split">
+      <img class="jk-map" src="/images/deck/junglekeepers-map.jpg"
+           alt="Map of the Junglekeepers protected area in Madre de Dios, Peru" />
+
+      <div class="people">
+        <div class="person">
+          <img src="/images/team/nathan-hattrup-headshot.jpeg" alt="Nathan Hattrup" />
+          <div>
+            <div class="name">Nathan Hattrup</div>
+            <div class="role">EE</div>
+          </div>
+        </div>
+        <div class="person">
+          <img src="/images/team/tyler-danner-headshot.jpeg" alt="Tyler Danner" />
+          <div>
+            <div class="name">Tyler Danner</div>
+            <div class="role">ISE</div>
+          </div>
+        </div>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <img class="logo" src="/images/deck/junglekeepers-logo.jpg" alt="Junglekeepers" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 6. ASK ========== -->
+  <section class="slide">
+    <div class="solo">
+      <h2 class="slide-title">How You Can Help</h2>
+      <div class="rule"></div>
+      <p class="sub">What We Need to Continue Our Growth</p>
+    </div>
+  </section>
+
+  <p class="counter" id="counter"></p>
+</div>
+
+<script>
+/*
+  ============================================================
+  DECK RUNTIME
+  Two jobs: fit the fixed canvas to the window, and move between slides.
+  No dependencies, no build step. This file is served exactly as written.
+  ============================================================
+*/
+(function () {
+  "use strict";
+
+  var W = 1280, H = 720;                       // the canvas, must match .stage
+  var stage   = document.getElementById("stage");
+  var counter = document.getElementById("counter");
+  var slides  = Array.prototype.slice.call(stage.querySelectorAll(".slide"));
+  var index   = 0;
+
+  /* ---- Fit -------------------------------------------------
+     Scale the whole canvas by whichever axis runs out first, so the
+     slide always fits entirely and keeps its 16:9 shape. The leftover
+     space becomes the letterbox bars. CSS alone cannot do this: scale()
+     needs a unitless number, and dividing a viewport length by a plain
+     number is not valid in calc().                                    */
+  function fit() {
+    var s = Math.min(window.innerWidth / W, window.innerHeight / H);
+    stage.style.setProperty("--scale", s);
+  }
+
+  /* ---- Show ------------------------------------------------
+     Clamp rather than wrap: pressing right on the last slide should sit
+     still, not silently loop back to the cover mid-talk.               */
+  function show(next) {
+    index = Math.max(0, Math.min(slides.length - 1, next));
+    slides.forEach(function (el, i) {
+      el.classList.toggle("is-active", i === index);
+    });
+    stage.setAttribute("data-index", index);
+    counter.textContent = (index + 1) + " / " + slides.length;
+    // Hash keeps your place across an accidental reload. replaceState
+    // instead of location.hash so the browser's back button does not
+    // fill up with one entry per slide.
+    history.replaceState(null, "", "#" + (index + 1));
+  }
+
+  /* ---- Keys ------------------------------------------------
+     Space and PageDown/PageUp are here because that is what nearly every
+     presentation clicker actually emits over USB.                      */
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key;
+
+    if (k === "ArrowRight" || k === "ArrowDown" || k === "PageDown" ||
+        k === " " || k === "Spacebar" || k === "Enter") {
+      e.preventDefault(); show(index + 1); return;
+    }
+    if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp" ||
+        k === "Backspace") {
+      e.preventDefault(); show(index - 1); return;
+    }
+    if (k === "Home") { e.preventDefault(); show(0); return; }
+    if (k === "End")  { e.preventDefault(); show(slides.length - 1); return; }
+
+    // Digit jump, for when someone in Q&A asks to see the table again.
+    if (k >= "1" && k <= "9") {
+      var n = parseInt(k, 10) - 1;
+      if (n < slides.length) { e.preventDefault(); show(n); }
+      return;
+    }
+
+    // f for fullscreen. F11 does the same thing; this just saves reaching.
+    if (k === "f" || k === "F") {
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+  });
+
+  window.addEventListener("resize", fit);
+  // Entering or leaving fullscreen resizes the window on some window
+  // managers without firing resize reliably, so refit on the event too.
+  document.addEventListener("fullscreenchange", fit);
+
+  fit();
+  // Restore from #n if present, otherwise start on the cover.
+  var start = parseInt((location.hash || "").replace("#", ""), 10);
+  show(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
