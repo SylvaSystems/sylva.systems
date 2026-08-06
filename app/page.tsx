@@ -223,16 +223,13 @@ export default function Home() {
       {/*
         5. PLATFORM REQUIREMENTS: a definition list (<dl> = term + detail
         pairs, the semantically correct HTML for this) looping over the
-        requirements array at the top of this file. The regulatory
+        requirements array at the top of this file, stacked in the left
+        column against the airframe turntable on the right. The regulatory
         paragraph closes the section.
 
-        When the prototype workbench photo exists (UAV on the bench or wing
-        assembly in progress, portrait 4:5 crop, our own shot), restore the
-        3/5 + 2/5 split: wrap the <dl> in
-        <div className="mt-12 grid gap-12 md:grid-cols-5"> with the dl at
-        md:col-span-3 (and drop its mt-12), and add
-        <img className="aspect-[4/5] w-full object-cover md:col-span-2" />
-        as the second grid child.
+        This section is the one place with real imagery, so it needs no
+        placeholder: the drawing is generated from assets/Sylva1.glb rather
+        than photographed. See "The drone turntable" in CLAUDE.md.
       */}
       <section className="mx-auto max-w-page px-4 py-28 sm:px-8">
         <h2 className="text-2xl font-bold md:text-3xl">

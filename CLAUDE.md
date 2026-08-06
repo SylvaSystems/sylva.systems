@@ -59,6 +59,14 @@ Chain of tools, bottom to top:
   component, elements get utility classes like `mt-6 text-lg font-bold`.
   Each class is one CSS rule. The build scans our files and generates a
   stylesheet containing only the classes actually used.
+- **three.js** is the 3D library, used by exactly one thing: the drone
+  turntable on the landing page. It is loaded with a dynamic `import()`, so
+  it is split into its own chunk and only fetched when that section is
+  scrolled near. Nothing else on the site touches it.
+
+Outside the npm chain, **python3 + numpy** run the two scripts in `scripts/`
+that turn the CAD model into web assets. They are not part of `npm run
+build`; run them by hand when the model changes.
 
 ### File map
 
@@ -80,10 +88,30 @@ app/                    THE PAGES. Folder structure = URL structure.
 components/             Reusable pieces used by the pages.
   site-nav.tsx          Masthead header (wordmark + link row).
   site-footer.tsx       Dark one-line footer.
-  media-slot.tsx        Labeled placeholder box for missing images/video.
+  wordmark.tsx          The Sylva Systems lockup, inline SVG.
+  drone-turntable.tsx   Live 3D airframe drawing (client component, LIVE).
   hero-lattice.tsx      Animated hero grid canvas (client component, PARKED).
-public/                 Files copied to the site as-is.
+  media-slot.tsx        Labeled placeholder box for missing images/video.
+                        Currently unused; kept for development.
+scripts/                Build-time tooling. Python, not part of the npm build;
+                        rerun by hand when assets/Sylva1.glb changes.
+  glb.py                Minimal glTF-binary reader (shared by the two below).
+  export-drone-geometry.py  GLB -> public/drone/sylva1.bin for the live render.
+  render-drone.py       Offline hidden-line renderer -> the still fallback.
+assets/                 ORIGINALS. Never served. Full-res sources that get
+                        processed into public/ (headshots, deck photos, the
+                        .glb, the CAD reference render).
+public/                 Files copied to the site as-is, at the URL root.
   fonts/                Latin Modern .woff2 font files (from latex-css repo).
+  images/team/          6 headshots, 800x800 JPEGs.
+  images/deck/          Deck photography.
+  drone/                sylva1.bin (geometry) + still.json (fallback frame).
+  deck/index.html       The pitch deck: a hand-written, self-contained page.
+                        Unlisted (noindex, no nav link). It lives in public/
+                        deliberately - see the long comment at the top of the
+                        file - because app/ would force the site masthead and
+                        footer onto every slide.
+  CNAME                 The custom domain (sylva.systems) for GitHub Pages.
   .nojekyll             Tells GitHub Pages not to run Jekyll on the output.
 out/                    BUILD OUTPUT. The actual deployed site. Regenerated
                         by every build; never edit by hand.
@@ -240,7 +268,7 @@ Validation is the browser's own (`required`, `type="email"`). The red
 invalid-border styling lives in `globals.css` (`:user-invalid` fires only
 after the user has interacted with a field).
 
-### Placeholders and how to replace them
+### Images: placeholders, originals, and what is still missing
 
 The site currently ships with NO placeholders: every missing asset's
 section was reflowed to a text-only layout, and each spot carries a JSX
@@ -260,11 +288,25 @@ hero comment in `app/page.tsx` and use:
 </video>
 ```
 
+Two folders, two jobs. `assets/` holds the ORIGINALS: full resolution,
+whatever format they arrived in, never served. `public/` holds the processed,
+web-ready copies, and those are the only ones the site can load. To swap an
+image: drop the new original in `assets/`, process it, and overwrite the file
+in `public/images/...`. Only the second step changes the site; skipping the
+first just loses the archive. Filenames must match what the page requests -
+Nathan's headshot is a .png in `assets/` and a .jpeg in `public/`, because the
+rename happened during processing.
+
 Assets in place:
 
 - About: 6 team headshots, 800x800 JPEGs in `public/images/team/`
   (originals in `assets/`; Nathan's was center-cropped square + resized,
-  Hank's was 797x797 upscaled to 800x800).
+  Hank's was 797x797 upscaled to 800x800, Tyler's was cropped 1000x1000
+  off-centre to centre his face, then resized).
+- Deck: 3 photos in `public/images/deck/` (originals in `assets/deck/`).
+- Requirements: the airframe drawing, generated from `assets/Sylva1.glb`.
+  See "The drone turntable" above. `assets/Sylva1_pen.jpg` is the CAD
+  reference render the drawing's style was matched to.
 
 Assets still needed (each described by a comment at its spot in the page):
 
@@ -275,8 +317,10 @@ Assets still needed (each described by a comment at its spot in the page):
    (candidate: CNN image, Marizilda Cruppe/WWF-UK - NEEDS LICENSE).
 4. Tools row square: ranger patrol photo
    (candidate: Junglekeepers Instagram post Cz3179MAXcq - ask them).
-5. Requirements: prototype workbench photo (our own).
-6. About: team group photo (our own).
+5. About: team group photo (our own).
+
+Sitting in `assets/deck/` but not used anywhere yet: `rainforest-map.png`.
+Copy it into `public/images/deck/` and reference it to put it on a slide.
 
 Licensing note: citing a photo credits the author; it is not permission.
 Agency photos (Guardian/eyevine, WWF) need a paid license. The
@@ -290,6 +334,10 @@ npm run dev       # local dev server at http://localhost:3000, live-reloads
 npm run build     # type-checks + builds the deployable site into out/
 ```
 
+The drone assets are NOT rebuilt by `npm run build`; they are committed
+under `public/drone/`. Regenerate them by hand only when the model changes
+(see "The drone turntable"). That needs python3 with numpy, nothing else.
+
 Deploy = publish the `out/` folder to GitHub Pages (e.g. push it to the
 Pages branch, or use an Action that runs `npm run build` and uploads
 `out/`). `public/.nojekyll` is required so Pages serves the `_next/`
@@ -297,7 +345,10 @@ folder (Jekyll ignores underscore-folders by default).
 
 If the site is served from `username.github.io/REPO` instead of a custom
 domain, set `basePath: "/REPO"` in `next.config.ts`. With the custom
-domain (sylva.systems) leave it as is.
+domain (sylva.systems) leave it as is. Two things do not follow that
+setting automatically: every absolute path inside `public/deck/index.html`
+would need the prefix by hand, and the turntable's `fetch("drone/...")` is
+deliberately written relative so that it does.
 
 ### Adding blog posts later
 
