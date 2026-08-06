@@ -1,6 +1,27 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import Link from "next/link";
+import { DroneTurntable } from "@/components/drone-turntable";
 // Animated hero grid, parked for now - see the comment in the hero below.
 // import { HeroLattice } from "@/components/hero-lattice";
+
+/*
+  Still frame of the Sylva 1 airframe, rendered from assets/Sylva1.glb by
+  scripts/render-drone.py (see CLAUDE.md). Read here at BUILD time, not in the
+  browser, and inlined into the exported HTML so the drawing exists before any
+  JavaScript runs. The live WebGL turntable replaces it once its geometry
+  arrives, framed identically so the handover does not jump.
+*/
+const droneStill: {
+  w: number;
+  h: number;
+  elev: number;
+  az0: number;
+  camWidth: number;
+  camHeight: number;
+  frames: string[];
+} = JSON.parse(readFileSync(join(process.cwd(), "public/drone/still.json"), "utf8"));
+const { frames: droneFrames, ...droneMeta } = droneStill;
 
 /*
   LANDING PAGE ("/").
@@ -217,20 +238,33 @@ export default function Home() {
         <h2 className="text-2xl font-bold md:text-3xl">
           Above all else, our platform needs to be:
         </h2>
-        <dl className="mt-12 grid gap-x-12 gap-y-14 sm:grid-cols-2">
-          {/* .map() renders one <div> per requirement; key= helps React
-              track list items */}
-          {requirements.map(({ term, detail }) => (
-            <div key={term}>
-              <dt className="text-xl font-bold">
-                <span className="text-pine">{term}</span>,
-              </dt>
-              <dd className="mt-2 max-w-[48ch] leading-relaxed text-ink-soft">
-                {detail}
-              </dd>
+        {/* Requirements stack left, airframe turntable right. Single column
+            on phones, where the drone drops below the list. */}
+        <div className="mt-12 grid gap-12 md:grid-cols-12">
+          <dl className="md:col-span-5">
+            {/* .map() renders one <div> per requirement; key= helps React
+                track list items */}
+            {requirements.map(({ term, detail }) => (
+              <div key={term} className="mt-10 first:mt-0">
+                <dt className="text-xl font-bold">
+                  <span className="text-pine">{term}</span>,
+                </dt>
+                <dd className="mt-2 leading-relaxed text-ink-soft">{detail}</dd>
+              </div>
+            ))}
+          </dl>
+          {/* The list is taller than the drawing, so the drawing sticks to
+              the top of the viewport while the requirements scroll past. */}
+          <div className="md:col-span-7">
+            <div className="md:sticky md:top-16">
+              <DroneTurntable
+                still={droneFrames[0]}
+                meta={droneMeta}
+                label="Line drawing of the Sylva 1 airframe, rotating on a turntable. Drag to turn it."
+              />
             </div>
-          ))}
-        </dl>
+          </div>
+        </div>
         <p className="mt-14 max-w-measure leading-relaxed">
           All of these capabilities and constraints must also match existing
           regulatory frameworks in order to be able to fly. It’s why

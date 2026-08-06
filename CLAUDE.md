@@ -102,15 +102,78 @@ page file.
 
 1. `layout.tsx` renders `<html><body>` with the font variable attached,
    then the nav, then the current page's content, then the footer.
-2. Every component here is a **Server Component** (the Next.js default):
-   it runs once at build time and outputs static HTML. One client
-   component exists but is PARKED (built, working, not rendered):
-   `components/hero-lattice.tsx`, the animated hero grid canvas. While
-   parked, the site ships zero client JS beyond the framework itself;
-   the hero shows the static .bg-diamond CSS pattern. Re-enable per the
-   "PARKED" comment in app/page.tsx's hero. All interactive behavior on
-   the live site is pure CSS (hover states, form validation).
+2. Almost every component here is a **Server Component** (the Next.js
+   default): it runs once at build time and outputs static HTML. Two
+   client components exist:
+   - `components/drone-turntable.tsx` is LIVE, in the requirements
+     section of the landing page. See "The drone turntable" below.
+   - `components/hero-lattice.tsx` is PARKED (built, working, not
+     rendered): the animated hero grid canvas. The hero shows the static
+     .bg-diamond CSS pattern instead. Re-enable per the "PARKED" comment
+     in app/page.tsx's hero.
+
+   Apart from the turntable, all interactive behavior on the live site is
+   pure CSS (hover states, form validation).
 3. `npm run build` writes the finished HTML per page into `out/`.
+
+### The drone turntable
+
+The rotating line drawing of the airframe, in the requirements section of the
+landing page. It is a real 3D render: three.js draws the model live, so the
+spin is continuous and it can be dragged on both axes, like the globe on
+nathanhattrup.com.
+
+How the "pen" look is made, every frame:
+
+- A paper-coloured copy of the mesh is drawn first with a polygon offset. It
+  is invisible against the page, but it fills the depth buffer, and that is
+  what removes the hidden lines. It is drawn `DoubleSide` on purpose: the CAD
+  export does not wind every part consistently, and back-face culling would
+  punch holes in the depth buffer.
+- Crease and boundary edges never change as the camera orbits, so they are
+  uploaded once.
+- Silhouette edges depend on the view, so they are recomputed on the CPU each
+  frame: one dot product per face, then a sign comparison per candidate edge.
+  Roughly 26k candidates, well under a millisecond.
+
+Two build-time scripts feed it (both need only python3 + numpy):
+
+```
+# geometry for the live render: welded, quantised positions + indices
+python3 scripts/export-drone-geometry.py assets/Sylva1.glb public/drone/sylva1.bin
+
+# the still frame used before JS runs, and when there is no WebGL
+python3 scripts/render-drone.py assets/Sylva1.glb public/drone \
+  --frames 120 --only 0 --res 1400 --out-res 1000 --elev 20 --az0 60 \
+  --bias 0.010 --crease 15 --min-px 1.0 --collinear 1.0 --min-poly 0 --stroke 2.0
+mv public/drone/frames.json public/drone/still.json
+```
+
+Rerun both after changing the model. `render-drone.py` is a complete offline
+hidden-line renderer (z-buffer, Ramer-Douglas-Peucker thinning); `--frames 120
+--only 0` means "work out the framing over a full turn, but write only the
+first frame", which is what keeps the still and the live view identically
+framed so the handover does not jump. Its `--bias` is the touchy flag: too low
+and the fuselage silhouette breaks into dashes, too high and hidden lines leak
+through. The filtering flags (`--min-px`, `--min-poly`, `--collinear`) trade
+detail for bytes; they are set low here because the still is only one frame.
+
+`app/page.tsx` reads `still.json` at BUILD time and inlines its path into the
+exported HTML, so the drawing exists before any JavaScript runs.
+`components/drone-turntable.tsx` then replaces it. three.js and the geometry
+are both fetched only once the section comes within 400px of the viewport, so
+a reader who never scrolls that far pays nothing. Tunables (spin speed, resume
+delay, drag sweep, tilt limit, and the two edge-detail angles) sit at the top
+of the component. Reduced motion stops the auto-spin but keeps drag, same as
+the globe.
+
+Payload, all of it deferred: `sylva1.bin` is 392KB raw / 261KB gzipped, and
+three.js adds ~135KB gzipped as its own chunk. `CREASE_DEG` is the dial for
+how much surface detail is drawn; lower keeps more.
+
+Known quirk: the propeller is modelled as a flat disc, and since it is real
+geometry it occludes the nose behind it. The CAD reference render
+(assets/Sylva1_pen.jpg) shows it see-through instead.
 
 ### The styling system, tokens first
 
